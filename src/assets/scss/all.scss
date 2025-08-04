@@ -1,0 +1,36 @@
+/* --- 1. 覆蓋 Bootstrap 預設變數 --- */
+// 將預設的主題藍色，改為一個更適合天氣主題的柔和藍色
+$primary: #007bff; 
+
+/* --- 2. 引入 Bootstrap SCSS --- */
+@import "bootstrap/scss/bootstrap";
+
+/* --- 3. 定義動態天氣背景 --- */
+.app-container {
+  // 預設背景
+  background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+  transition: background 1s ease-in-out; // 讓背景切換有平滑的過渡動畫
+}
+
+.bg-sunny {
+  // 晴天背景：黃昏漸層
+  background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+}
+
+.bg-rainy {
+  // 雨天背景：灰暗漸層
+  background: linear-gradient(135deg, #6a85b6 0%, #bac8e0 100%);
+}
+
+.bg-cloudy {
+  // 多雲背景：天空漸層
+  background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+}
+
+/* --- 4. 美化卡片元件 (玻璃擬態效果) --- */
+.card {
+  // 增加半透明和模糊效果
+  background-color: rgba(255, 255, 255, 0.7) !important; // !important 用來覆蓋 Bootstrap 的預設樣式
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
