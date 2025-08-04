@@ -1,6 +1,6 @@
 # React Weather App (天氣查詢應用)
 
-**[➡️ Live Demo - 線上預覽網站](ttps://mos25399.github.io/my-weather-app/)**
+**[➡️ Live Demo - 線上預覽網站](https://mos25399.github.io/my-weather-app/)**
 
 這是一個使用 React 和 Vite 建立的天氣查詢應用程式。使用者可以輸入城市名稱，透過串接 **OpenWeatherMap API**，獲取並顯示該城市的即時天氣資訊。此專案主要用於展示串接第三方 RESTful API、處理非同步資料流，以及根據 API 回應動態變更 UI 的能力。
 
