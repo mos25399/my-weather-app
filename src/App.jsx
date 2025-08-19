@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-// 建議引入您專案的 SCSS 主檔案，即使是空的，也保持好習慣
-// import './assets/scss/all.scss';
-
 function App() {
   const [city, setCity] = useState("");
   const [weatherData, setWeatherData] = useState(null);
+  const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [backgroundClass, setBackgroundClass] = useState("bg-default");
@@ -34,11 +32,25 @@ function App() {
     }
     setLoading(true);
     setWeatherData(null);
+    setForecastData([]); // 每次搜尋前都清空舊的預報
     setError("");
     try {
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=zh_tw`;
-      const response = await axios.get(apiUrl);
-      setWeatherData(response.data);
+      // --- 同時請求兩個 API ---
+      const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=zh_tw`;
+      const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric&lang=zh_tw`;
+
+      // 使用 Promise.all 來並行發送請求
+      const [currentWeatherResponse, forecastResponse] = await Promise.all([
+        axios.get(currentWeatherUrl),
+        axios.get(forecastUrl),
+      ]);
+
+      setWeatherData(currentWeatherResponse.data);
+
+      // OpenWeatherMap 的 5 日預報 API 會回傳每 3 小時的資料，共 40 筆
+      // 我們需要從中篩選出每天中午 12:00 的資料作為代表
+      const dailyForecasts = forecastResponse.data.list.filter((item) => item.dt_txt.includes("12:00:00"));
+      setForecastData(dailyForecasts);
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setError("找不到這個城市，請檢查拼寫。");
@@ -57,7 +69,7 @@ function App() {
         className="card text-center shadow-lg"
         style={{
           width: "100%",
-          maxWidth: "400px",
+          maxWidth: "500px",
           backgroundColor: "rgba(255, 255, 255, 0.85)",
           backdropFilter: "blur(10px)",
         }}
@@ -94,6 +106,7 @@ function App() {
 
           {weatherData && (
             <div className="weather-info mt-4">
+              {/* --- 當前天氣資訊顯示 --- */}
               <h2>
                 {weatherData.name}, {weatherData.sys.country}
               </h2>
@@ -108,6 +121,24 @@ function App() {
               <div className="d-flex justify-content-around mt-3">
                 <p>體感溫度: {Math.round(weatherData.main.feels_like)}°C</p>
                 <p>濕度: {weatherData.main.humidity}%</p>
+              </div>
+
+              {/* --- 未來 5 日天氣預報 --- */}
+              <hr />
+              <h5 className="mt-4">未來天氣預報</h5>
+              <div className="d-flex justify-content-between mt-3">
+                {forecastData.map((forecast, index) => (
+                  <div key={index} className="text-center">
+                    <p className="mb-1 small">
+                      {new Date(forecast.dt * 1000).toLocaleDateString("zh-TW", { weekday: "short" })}
+                    </p>
+                    <img
+                      src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}.png`}
+                      alt={forecast.weather[0].description}
+                    />
+                    <p className="fw-bold">{Math.round(forecast.main.temp)}°C</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
